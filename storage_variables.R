@@ -1,15 +1,25 @@
 #storage_variables
 
-
-agent.pay = c()
+# basic variables for storage
 period=c()
 complexity = c()
 local_peaks_payoff =c()
 local_peaks_sd = c()
 local_peaks_number = c()
 global.peak = c()
-end.greedy.period = c()
-end.greedy.performance = c()
-end.performance = c()
-outperf.lp = c()
-end.performance.s2 =c()
+
+N.end = c()
+
+agent.pos.list <- list()
+agent.adapt.list <- list()
+agent.payoff.list <- list()
+
+for(i in 1:list.agents)
+{
+  agent.pos.list <- append(agent.pos.list, list(c()))
+  agent.adapt.list <- append(agent.adapt.list, list(c()))
+  agent.payoff.list <- append(agent.payoff.list, list(c()))
+}
+
+
+

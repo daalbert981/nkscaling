@@ -35,3 +35,18 @@ fun.payoff = function(pos = "Position", active = "Selected elements from L" )
   }
   return(as.integer(m*sum(w)/length(active)))
 }
+
+i.bin.to.integ = function(binary = "Binary string of length N"){Reduce(function(x,y) x*2+y, rev(binary))} #converts binary into integer (number) 
+i.integ.to.bin = function(integ = "Integer between 0 and (2^N)-1"){as.integer(((intToBits(integ))[1:N]))} #converts integer into N-length binary string
+
+i.greedy.active = function(position = "current position", active = "selected elements")
+{
+  tmp.string <- matrix(position,nrow = length(active),ncol = length(position),byrow = TRUE)
+  for(j in 1:length(active))
+  {
+    tmp.string[j,active[j]] <- abs(tmp.string[j,active[j]]-1) 
+  }
+  tmp.string <- rbind(tmp.string,position)
+  tmp.payoffs <- apply(tmp.string,1, function(y) fun.payoff(y,active))
+  return(as.vector(tmp.string[which.max(tmp.payoffs),]))
+}
