@@ -15,7 +15,14 @@ aK <-c()
 for(l in 1:length(agent.K.list)){aK <- cbind(aK,agent.K.list[[l]])}
 colnames(aK) <- paste('agent',1:ncol(aK),'K', sep = ".")
 
+aadd <- c()
+for(l in 1:length(agent.addition.list)){aadd <- cbind(aadd,agent.addition.list[[l]])}
+colnames(aadd) <- paste('agent',1:ncol(aadd),'add', sep = ".")
+
+
+
+
 period <- c(1:T)
 
-raw.data <- as.data.frame(cbind(N,N.start,K.start = K,period,aN,aK,apayoffs,aadapts))
-#write.csv(results, file = paste("ganco_",version ,"_it_", iter, ".csv",sep=""))
+raw.data <- as.data.frame(cbind(N,N.start,K.start = K,period,aN,aK,aadd,apayoffs/mult,aadapts))
+write.csv(raw.data, file = paste("nkscaling_",version ,"_it_", iter, ".csv",sep=""))

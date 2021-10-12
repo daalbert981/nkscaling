@@ -50,3 +50,31 @@ i.greedy.active = function(position = "current position", active = "selected ele
   tmp.payoffs <- apply(tmp.string,1, function(y) fun.payoff(y,active))
   return(as.vector(tmp.string[which.max(tmp.payoffs),]))
 }
+
+
+strategy <- function(focal.agent = "focal firm", s = "strategy (closer,wider,lower)") #-0.25 tau --> the smaller the difference, the greater the prob
+{
+  
+  get.agent.perfs <- (sapply(agent.payoff.list, function(o) o[[t]]))/mult
+  f <- get.agent.perfs[focal.agent]
+  differences <- get.agent.perfs - f
+  differences[focal.agent] <- 100 # just set a high value so that this one won't be picked as minumum (as it is 0 (itself))
+  c <- get.agent.perfs[which.min(abs(differences))]
+  
+  if(s == "closer")
+  {
+    diff <- abs(f - c)/f
+    res <- pnorm(diff,0,0.11,lower.tail = F)  
+  }
+  if(s == "higher")
+  {
+    diff <- ifelse( ((f-c)/f)<0,0,(f-c)/f)
+    res <- 0.5 - pnorm(diff,0,0.11,lower.tail = F)  
+  }
+  if(s == "lower")
+  {
+    diff <- ifelse( ((c-f)/f)<0,0,(c-f)/f)
+    res <- 0.5 - pnorm(diff,0,0.11,lower.tail = F) }
+  return(res)
+}
+
