@@ -1,10 +1,12 @@
 #storage_variables
 
 # basic variables for storage
-local_peaks_payoff =c()
-local_peaks_sd = c()
-local_peaks_number = c()
-global.peak = c()
+local.peaks.performance = c()
+local.peaks.sd = c()
+number.local.peaks = c()
+gp.performance = c()
+
+benchmark.f.landscape = c()
 
 #### Scalable agent-specifc storage ######
 ##########################################

@@ -1,7 +1,7 @@
 ##########################################################################################################
 ##### Dynamic Scale NK Landscape #########################################################################
 ##### R-Code by Daniel Albert (based on contribution-value-engine by Marting Ganco) ######################
-version = 0.01
+version = 0.02
 ##########################################################################################################
 args = commandArgs(trailingOnly = TRUE)   #Cluster Computing related command
 iter = as.integer(args[1])                #Cluster Computing related command
@@ -39,6 +39,13 @@ agent.rel.perf.closest.list[[agent]][1] <- agent.payoff.list[[agent]][1]/max(sap
 agent.addition.list[[agent]][1] <- 0
 }
 
+########## Landscape Stats
+source("landscape_stats.R")
+
+local.peaks.performance[1] = lp_avg
+local.peaks.sd[1] = lp_sd
+number.local.peaks[1] = local.peaks.number
+gp.performance[1] = global.peak
 
 ##########   (STEP 3): Time Loop for agent search (t = 2 to T) 
 ##########
@@ -48,7 +55,7 @@ for(t in 2:T)
       {
         agent.pos.list[[agent]][t] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))
         agent.payoff.list[[agent]][t] <- fun.payoff(i.integ.to.bin(agent.pos.list[[agent]][t]),active.N)
-        agent.adapt.list[[agent]][t] <- ifelse(all(agent.pos.list[[agent]][t-1] == agent.pos.list[[agent]][t]),0,1)
+        agent.adapt.list[[agent]][t] <- ifelse(all(agent.pos.list[[agent]][t-1] == agent.pos.list[[agent]][t]),agent.adapt.list[[agent]][t-1],agent.adapt.list[[agent]][t-1]+1)
       }
   
   #### innovation stage #####
@@ -57,21 +64,31 @@ for(t in 2:T)
     set.seed(sample.seeds[length(sample.seeds)])
     sample.seeds <- sample.seeds[-length(sample.seeds)]
     agent.rel.perf.closest.list[[agent]][t] <- agent.payoff.list[[agent]][t]/max(sapply(agent.payoff.list[-agent], function(z) z[[t]]))
-    if(length(active.N) < N)
+    if(length(active.N) < N & agent.capability[agent]==1)
     {
-      agent.addition.list[[agent]][t] <- sample(c(0,1), 1, replace = TRUE, prob = c((1 - strategy(agent,'closer')), strategy(agent,'closer')))
-      active.N <- c(1:(length(active.N)+agent.addition.list[[agent]][t]))  
-    }else{agent.addition.list[[agent]][t] <- 0}
+      agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1] + sample(c(0,1), 1, replace = TRUE, prob = c((1 - add.N.prob), add.N.prob))
+      if(agent.addition.list[[agent]][t] != agent.addition.list[[agent]][t-1])
+      {
+        n.new <- N.sample(agent.pos.list[[agent]][t], S)  
+        active.N <- c(active.N,n.new)
+        active.N <- sort(active.N, decreasing = F)
+        
+        ########## Landscape Stats
+        source("landscape_stats.R")
+      }
+
+    }
     
   }
-  #new.N.prime <- max(active.N) + sum(sapply(agent.addition.list, function(x) x[[t]]))
-  #active.N <- c(1:new.N.prime)
+  local.peaks.performance[t] = lp_avg
+  local.peaks.sd[t] = lp_sd
+  number.local.peaks[t] = local.peaks.number
+  gp.performance[t] = global.peak
 
   for(agent in 1:list.agents)
   {
     agent.K.list[[agent]][t] <- (sum(L[active.N,active.N])-length(active.N))/length(active.N)
     agent.N.list[[agent]][t] <- length(active.N)
-    
   }
 }
 
