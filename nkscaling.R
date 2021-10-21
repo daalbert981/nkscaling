@@ -1,7 +1,7 @@
 ##########################################################################################################
 ##### Dynamic Scale NK Landscape #########################################################################
 ##### R-Code by Daniel Albert (based on contribution-value-engine by Marting Ganco) ######################
-version = 0.02
+version = 0.021
 ##########################################################################################################
 args = commandArgs(trailingOnly = TRUE)   #Cluster Computing related command
 iter = as.integer(args[1])                #Cluster Computing related command
@@ -77,7 +77,7 @@ for(t in 2:T)
         source("landscape_stats.R")
       }
 
-    }
+    }else{ agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1]}
     
   }
   local.peaks.performance[t] = lp_avg
