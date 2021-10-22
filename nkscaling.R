@@ -1,7 +1,7 @@
 ##########################################################################################################
 ##### Dynamic Scale NK Landscape #########################################################################
 ##### R-Code by Daniel Albert (based on contribution-value-engine by Marting Ganco) ######################
-version = 0.021
+version = 0.03
 ##########################################################################################################
 args = commandArgs(trailingOnly = TRUE)   #Cluster Computing related command
 iter = as.integer(args[1])                #Cluster Computing related command
@@ -23,6 +23,7 @@ D <- matrix(runif(2*N^2), ncol=N*2, nrow=N) #reference values for contribution v
 ##########   (STEP 2): Position seeding for period = 1 (no search in t = 1)
 ##########
 
+t = 1
 
 for(agent in 1:list.agents)
 {
@@ -37,6 +38,9 @@ for(agent in 1:list.agents)
 {
 agent.rel.perf.closest.list[[agent]][1] <- agent.payoff.list[[agent]][1]/max(sapply(agent.payoff.list[-agent], function(z) z[[1]]))
 agent.addition.list[[agent]][1] <- 0
+agent.element.dependencies.list[[agent]][1] <- 0
+agent.element.influences.list[[agent]][1] <- 0
+agent.ham.closest.list[[agent]][1] <- ham.closest(agent,active.N)
 }
 
 ########## Landscape Stats
@@ -70,16 +74,26 @@ for(t in 2:T)
       if(agent.addition.list[[agent]][t] != agent.addition.list[[agent]][t-1])
       {
         n.new <- N.sample(agent.pos.list[[agent]][t], S)  
+        agent.element.dependencies.list[[agent]][t] <- sum(L[n.new,active.N])
+        agent.element.influences.list[[agent]][t] <- sum(L[active.N,n.new])
         active.N <- c(active.N,n.new)
         active.N <- sort(active.N, decreasing = F)
         
         ########## Landscape Stats
         source("landscape_stats.R")
+      }else{
+        agent.element.dependencies.list[[agent]][t] <- 0
+        agent.element.influences.list[[agent]][t] <- 0
       }
 
-    }else{ agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1]}
+    }else{ 
+    agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1]
+    agent.element.dependencies.list[[agent]][t] <- 0
+    agent.element.influences.list[[agent]][t] <- 0
+    }
     
   }
+  
   local.peaks.performance[t] = lp_avg
   local.peaks.sd[t] = lp_sd
   number.local.peaks[t] = local.peaks.number
@@ -89,6 +103,7 @@ for(t in 2:T)
   {
     agent.K.list[[agent]][t] <- (sum(L[active.N,active.N])-length(active.N))/length(active.N)
     agent.N.list[[agent]][t] <- length(active.N)
+    agent.ham.closest.list[[agent]][t] <- ham.closest(agent,active.N)
   }
 }
 

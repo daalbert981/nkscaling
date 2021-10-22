@@ -111,4 +111,12 @@ new.pos <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(Position),c(active)))
 return(fun.payoff(i.integ.to.bin(new.pos),active))
   }
 
-
+ham.closest <- function(focal.agent = "focal firm", active = "Active elements") #-0.25 tau --> the smaller the difference, the greater the prob
+  {
+    get.agent.perfs <- (sapply(agent.payoff.list, function(o) o[[t]]))/mult
+    f <- get.agent.perfs[focal.agent]
+    differences <- get.agent.perfs - f
+    differences[focal.agent] <- 100 # just set a high value so that this one won't be picked as minumum (as it is 0 (itself))
+    c <- which.min(abs(differences))
+    return(sum(abs(i.integ.to.bin(agent.pos.list[[focal.agent]][t])[active] - i.integ.to.bin(agent.pos.list[[c]][t])[active])))
+  }
