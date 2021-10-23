@@ -120,3 +120,16 @@ ham.closest <- function(focal.agent = "focal firm", active = "Active elements") 
     c <- which.min(abs(differences))
     return(sum(abs(i.integ.to.bin(agent.pos.list[[focal.agent]][t])[active] - i.integ.to.bin(agent.pos.list[[c]][t])[active])))
   }
+
+
+### Random Search Function #####
+i.rand.local <- function(Position = "Current position", active = "Active elements")
+{
+  pick <- sample(active,1)
+  old.posit <- i.integ.to.bin(Position)
+  new.posit <- old.posit
+  new.posit[pick] <- abs(old.posit[pick] - 1)
+  new.posit <- ifelse(fun.payoff(new.posit,active)>fun.payoff(old.posit,active),i.bin.to.integ(new.posit), i.bin.to.integ(old.posit))
+  return(new.posit)
+}
+

@@ -38,6 +38,6 @@ period <- c(1:T)
 
 raw.data <- as.data.frame(cbind(N,N.start,K.start = K,period,aN,aK,aadd,apayoffs/mult,aadapts, hamming,
                                 Global.Peak = gp.performance/mult, Local.Peak.Avg = lp_avg/mult, Local.Peak.SD = lp_sd/mult, Number.Local.Peaks = number.local.peaks,
-                                new.dep, new.inf))
+                                new.dep, new.inf, search))
 
 write.csv(raw.data, file = paste("nkscaling_",version ,"_it_", iter, ".csv",sep=""))

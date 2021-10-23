@@ -1,7 +1,7 @@
 ##########################################################################################################
 ##### Dynamic Scale NK Landscape #########################################################################
 ##### R-Code by Daniel Albert (based on contribution-value-engine by Marting Ganco) ######################
-version = 0.03
+version = 0.04
 ##########################################################################################################
 args = commandArgs(trailingOnly = TRUE)   #Cluster Computing related command
 iter = as.integer(args[1])                #Cluster Computing related command
@@ -57,7 +57,11 @@ for(t in 2:T)
 {
   for(agent in 1:list.agents)
       {
-        agent.pos.list[[agent]][t] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))
+    if(search == "greedy")
+    {
+      agent.pos.list[[agent]][t] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))  
+    }else{agent.pos.list[[agent]][t] <- i.bin.to.integ(i.rand.local(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))}
+    
         agent.payoff.list[[agent]][t] <- fun.payoff(i.integ.to.bin(agent.pos.list[[agent]][t]),active.N)
         agent.adapt.list[[agent]][t] <- ifelse(all(agent.pos.list[[agent]][t-1] == agent.pos.list[[agent]][t]),agent.adapt.list[[agent]][t-1],agent.adapt.list[[agent]][t-1]+1)
       }
