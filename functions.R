@@ -91,7 +91,7 @@ for(k in 1:length(selected))
   repeat{
     old.pos <- new.pos[k]
     new.pos[k] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(new.pos),c(active.N,selected[k])))
-    if (old.pos <- new.pos[k]) break
+    if (old.pos == new.pos[k]) break
   }
   
 }
@@ -123,13 +123,13 @@ ham.closest <- function(focal.agent = "focal firm", active = "Active elements") 
 
 
 ### Random Search Function #####
-i.rand.local <- function(Position = "Current position", active = "Active elements")
+i.rand.local <- function(L.Position = "Current position", l.active = "Active elements")
 {
-  pick <- sample(active,1)
-  old.posit <- i.integ.to.bin(Position)
+  pick <- sample(l.active,1)
+  old.posit <- i.integ.to.bin(L.Position)
   new.posit <- old.posit
   new.posit[pick] <- abs(old.posit[pick] - 1)
-  new.posit <- ifelse(fun.payoff(new.posit,active)>fun.payoff(old.posit,active),i.bin.to.integ(new.posit), i.bin.to.integ(old.posit))
+  new.posit <- ifelse(fun.payoff(new.posit,l.active)>fun.payoff(old.posit,l.active),i.bin.to.integ(new.posit), i.bin.to.integ(old.posit))
   return(new.posit)
 }
 

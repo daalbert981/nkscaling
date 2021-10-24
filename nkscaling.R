@@ -1,7 +1,7 @@
 ##########################################################################################################
 ##### Dynamic Scale NK Landscape #########################################################################
 ##### R-Code by Daniel Albert (based on contribution-value-engine by Marting Ganco) ######################
-version = 0.04
+version = 0.042
 ##########################################################################################################
 args = commandArgs(trailingOnly = TRUE)   #Cluster Computing related command
 iter = as.integer(args[1])                #Cluster Computing related command
@@ -44,7 +44,11 @@ agent.ham.closest.list[[agent]][1] <- ham.closest(agent,active.N)
 }
 
 ########## Landscape Stats
-source("landscape_stats.R")
+if(record.landscape==1)
+{
+  source("landscape_stats.R")  
+}
+
 
 local.peaks.performance[1] = lp_avg
 local.peaks.sd[1] = lp_sd
@@ -60,55 +64,76 @@ for(t in 2:T)
     if(search == "greedy")
     {
       agent.pos.list[[agent]][t] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))  
-    }else{agent.pos.list[[agent]][t] <- i.bin.to.integ(i.rand.local(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))}
-    
-        agent.payoff.list[[agent]][t] <- fun.payoff(i.integ.to.bin(agent.pos.list[[agent]][t]),active.N)
-        agent.adapt.list[[agent]][t] <- ifelse(all(agent.pos.list[[agent]][t-1] == agent.pos.list[[agent]][t]),agent.adapt.list[[agent]][t-1],agent.adapt.list[[agent]][t-1]+1)
+    }else{
+      set.seed(sample.seeds[length(sample.seeds)])
+      sample.seeds <- sample.seeds[-length(sample.seeds)]
+      agent.pos.list[[agent]][t] <- i.bin.to.integ(i.rand.local(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))
       }
+
+    agent.payoff.list[[agent]][t] <- fun.payoff(i.integ.to.bin(agent.pos.list[[agent]][t]),active.N)
+    agent.adapt.list[[agent]][t] <- ifelse(all(agent.pos.list[[agent]][t-1] == agent.pos.list[[agent]][t]),agent.adapt.list[[agent]][t-1],agent.adapt.list[[agent]][t-1]+1)
+    
+    }
   
   #### innovation stage #####
   for(agent in 1:list.agents)
   {
+    print(agent)
+    agent.rel.perf.closest.list[[agent]][t] <- agent.payoff.list[[agent]][t]/max(sapply(agent.payoff.list[-agent], function(z) z[[t]]))
+    print("clear 01")
     set.seed(sample.seeds[length(sample.seeds)])
     sample.seeds <- sample.seeds[-length(sample.seeds)]
-    agent.rel.perf.closest.list[[agent]][t] <- agent.payoff.list[[agent]][t]/max(sapply(agent.payoff.list[-agent], function(z) z[[t]]))
+    print("clear 02")
     if(length(active.N) < N & agent.capability[agent]==1)
     {
+      print("clear 03")
       agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1] + sample(c(0,1), 1, replace = TRUE, prob = c((1 - add.N.prob), add.N.prob))
+      print("clear 04")
       if(agent.addition.list[[agent]][t] != agent.addition.list[[agent]][t-1])
       {
+        print("clear 05")
         n.new <- N.sample(agent.pos.list[[agent]][t], S)  
+        print("clear 06")
         agent.element.dependencies.list[[agent]][t] <- sum(L[n.new,active.N])
         agent.element.influences.list[[agent]][t] <- sum(L[active.N,n.new])
+        print("clear 07")
         active.N <- c(active.N,n.new)
         active.N <- sort(active.N, decreasing = F)
-        
+        print("clear 08")
         ########## Landscape Stats
-        source("landscape_stats.R")
+        if(record.landscape==1)
+        {
+          source("landscape_stats.R")  
+        }
       }else{
         agent.element.dependencies.list[[agent]][t] <- 0
         agent.element.influences.list[[agent]][t] <- 0
       }
-
+      print("clear 09")
     }else{ 
+      print("clear 09.1")
     agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1]
     agent.element.dependencies.list[[agent]][t] <- 0
     agent.element.influences.list[[agent]][t] <- 0
     }
-    
+    print("clear 10")
   }
   
   local.peaks.performance[t] = lp_avg
   local.peaks.sd[t] = lp_sd
   number.local.peaks[t] = local.peaks.number
   gp.performance[t] = global.peak
-
+  print("clear 11")
+  #wrap up info about this period
   for(agent in 1:list.agents)
   {
+    print("clear 12")
     agent.K.list[[agent]][t] <- (sum(L[active.N,active.N])-length(active.N))/length(active.N)
     agent.N.list[[agent]][t] <- length(active.N)
     agent.ham.closest.list[[agent]][t] <- ham.closest(agent,active.N)
+    print("clear 13")
   }
+  print("clear 14")
 }
 
 
