@@ -78,8 +78,8 @@ strategy <- function(focal.agent = "focal firm", s = "strategy (closer,wider,low
   return(res)
 }
 
-N.sample <- function(Position = "Current Position",s = "Size of Sample"){
-pool <- setdiff((1:N),active.N)
+N.sample <- function(Position = "Current Position",s = "Size of Sample", active = "active"){
+pool <- setdiff((1:N),unique(agent.active.list))
 if(length(pool)>1){
   selected <-  sample(pool, ifelse(length(pool) > (s-1),s,length(pool)), replace = F)  
 }else{selected <- pool[1]}
@@ -87,15 +87,15 @@ if(length(pool)>1){
 new.pos <- c()
 for(k in 1:length(selected))
 {
-  new.pos[k] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(Position),c(active.N,selected[k])))
+  new.pos[k] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(Position),c(active,selected[k])))
   repeat{
     old.pos <- new.pos[k]
-    new.pos[k] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(new.pos),c(active.N,selected[k])))
+    new.pos[k] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(new.pos),c(active,selected[k])))
     if (old.pos == new.pos[k]) break
   }
   
 }
-outcome <- sapply(new.pos, function(x) fun.payoff(i.integ.to.bin(x),c(active.N,selected[which(new.pos==x)])))
+outcome <- sapply(new.pos, function(x) fun.payoff(i.integ.to.bin(x),c(active,selected[which(new.pos==x)])))
 new.N <- selected[which.max(outcome)]
 return(new.N)
 }

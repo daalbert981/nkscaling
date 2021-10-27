@@ -20,6 +20,7 @@ agent.addition.list <- c()
 agent.element.dependencies.list <- c()
 agent.element.influences.list <- c()
 agent.ham.closest.list <- c()
+agent.active.list <- c()
 
 for(i in 1:list.agents)
 {
@@ -33,6 +34,7 @@ for(i in 1:list.agents)
   agent.addition.list <- append(agent.addition.list, list(c()))
   agent.element.dependencies.list <- append(agent.element.dependencies.list, list(c()))
   agent.element.influences.list <- append(agent.element.influences.list, list(c()))
+  agent.active.list <- append(agent.active.list, list(c()))
 }
 ##########################################
 

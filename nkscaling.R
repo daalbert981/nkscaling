@@ -1,7 +1,7 @@
 ##########################################################################################################
 ##### Dynamic Scale NK Landscape #########################################################################
-##### R-Code by Daniel Albert (based on contribution-value-engine by Marting Ganco) ######################
-version = 0.042
+##### R-Code by Daniel Albert (based on contribution-value-engine by Martin Ganco) ######################
+version = 0.05
 ##########################################################################################################
 args = commandArgs(trailingOnly = TRUE)   #Cluster Computing related command
 iter = as.integer(args[1])                #Cluster Computing related command
@@ -27,6 +27,12 @@ t = 1
 
 for(agent in 1:list.agents)
 {
+  if(agents.differ=="yes")
+  {
+    agent.active.list[[agent]] <- sample(1:N,N.start,replace = F)
+  }else{agent.active.list[[agent]] <- c(1:N.start)}
+  
+  active.N <- agent.active.list[[agent]]
   agent.pos.list[[agent]][1] <- i.bin.to.integ(rep(sample(c(0,1),N,replace = TRUE)))
   agent.payoff.list[[agent]][1] <- fun.payoff(i.integ.to.bin(agent.pos.list[[agent]][1]),active.N)
   agent.adapt.list[[agent]][1] <- 0
@@ -61,6 +67,7 @@ for(t in 2:T)
 {
   for(agent in 1:list.agents)
       {
+    active.N <- agent.active.list[[agent]]
     if(search == "greedy")
     {
       agent.pos.list[[agent]][t] <- i.bin.to.integ(i.greedy.active(i.integ.to.bin(agent.pos.list[[agent]][t-1]),active.N))  
@@ -78,28 +85,24 @@ for(t in 2:T)
   #### innovation stage #####
   for(agent in 1:list.agents)
   {
-    print(agent)
+    active.N <- agent.active.list[[agent]]
     agent.rel.perf.closest.list[[agent]][t] <- agent.payoff.list[[agent]][t]/max(sapply(agent.payoff.list[-agent], function(z) z[[t]]))
-    print("clear 01")
     set.seed(sample.seeds[length(sample.seeds)])
     sample.seeds <- sample.seeds[-length(sample.seeds)]
-    print("clear 02")
     if(length(active.N) < N & agent.capability[agent]==1)
     {
-      print("clear 03")
       agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1] + sample(c(0,1), 1, replace = TRUE, prob = c((1 - add.N.prob), add.N.prob))
-      print("clear 04")
       if(agent.addition.list[[agent]][t] != agent.addition.list[[agent]][t-1])
       {
-        print("clear 05")
-        n.new <- N.sample(agent.pos.list[[agent]][t], S)  
-        print("clear 06")
+        n.new <- N.sample(agent.pos.list[[agent]][t], S, active.N)  
         agent.element.dependencies.list[[agent]][t] <- sum(L[n.new,active.N])
         agent.element.influences.list[[agent]][t] <- sum(L[active.N,n.new])
-        print("clear 07")
-        active.N <- c(active.N,n.new)
-        active.N <- sort(active.N, decreasing = F)
-        print("clear 08")
+        for(i in 1:list.agents)
+        {
+          agent.active.list[[i]] <- append(agent.active.list[[i]],n.new)
+          agent.active.list[[i]] <- sort(agent.active.list[[i]], decreasing = F)
+        }
+        
         ########## Landscape Stats
         if(record.landscape==1)
         {
@@ -109,31 +112,25 @@ for(t in 2:T)
         agent.element.dependencies.list[[agent]][t] <- 0
         agent.element.influences.list[[agent]][t] <- 0
       }
-      print("clear 09")
     }else{ 
-      print("clear 09.1")
     agent.addition.list[[agent]][t] <- agent.addition.list[[agent]][t-1]
     agent.element.dependencies.list[[agent]][t] <- 0
     agent.element.influences.list[[agent]][t] <- 0
     }
-    print("clear 10")
   }
   
   local.peaks.performance[t] = lp_avg
   local.peaks.sd[t] = lp_sd
   number.local.peaks[t] = local.peaks.number
   gp.performance[t] = global.peak
-  print("clear 11")
   #wrap up info about this period
   for(agent in 1:list.agents)
   {
-    print("clear 12")
+    active.N <- agent.active.list[[agent]]
     agent.K.list[[agent]][t] <- (sum(L[active.N,active.N])-length(active.N))/length(active.N)
     agent.N.list[[agent]][t] <- length(active.N)
     agent.ham.closest.list[[agent]][t] <- ham.closest(agent,active.N)
-    print("clear 13")
   }
-  print("clear 14")
 }
 
 

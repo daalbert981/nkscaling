@@ -1,8 +1,8 @@
 ## Input Values
 
-N=22
+N=30
 N.start=10
-K=7
+K=10
 mult=1e+09
 #mult=1000000000
 m=mult
@@ -10,8 +10,9 @@ T=50
 add.N.prob <- 0.1
 S=3 #how many different N additions sampled ?
 
-search <- "random"  #set to "random" or "greedy"
-record.landscape <- 1 # 0 = No, 1 = yes
+search <- "greedy"  #set to "random" or "greedy"
+record.landscape <- 0 # 0 = No, 1 = yes
+agents.differ = "yes"
 
 
 list.agents=2

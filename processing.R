@@ -1,17 +1,40 @@
 library(data.table)
+library(ggplot2)
 
-df <- fread("data/nks003.csv") 
-df2 <- fread("data/nks003_bench.csv")
+df <- fread("data/nks004.csv")  # non-greedy
+#df <- fread("data/nks0041.csv")  # greedy
+df2 <- fread("data/nks0041_bench.csv") #benchmark non-greedy
 df <- as.data.frame(df)
 df2 <- as.data.frame(df2)
 
+#MEAN
 nks <- aggregate(df, list(df$period), function(x) mean(x))
 nks <- nks[,-c(1:2)]
 nks <- as.data.frame(nks)
+############
+#SD
+nks.sd <- aggregate(df, list(df$period), function(x) sd(x))
+nks.sd <- nks.sd[,-c(1:2)]
+nks.sd <- as.data.frame(nks.sd)
+colnames(nks.sd) <- sapply(colnames(nks.sd), function(x) paste(x,'SD',sep = "."))
+###########################
+nks <- cbind(nks, nks.sd) #
+###########################
 
+#####NKS 2 (Benchmark)
 nks2 <- aggregate(df2, list(df2$period), function(x) mean(x))
 nks2 <- nks2[,-c(1:2)]
 nks2 <- as.data.frame(nks2)
+###########
+#SD
+nks2.sd <- aggregate(df, list(df$period), function(x) sd(x))
+nks2.sd <- nks2.sd[,-c(1:2)]
+nks2.sd <- as.data.frame(nks2.sd)
+colnames(nks2.sd) <- sapply(colnames(nks2.sd), function(x) paste(x,'SD',sep = "."))
+##############################
+nks2 <- cbind(nks2, nks2.sd) #
+##############################
+
 
 #write.csv(nks, file = "mean_output.csv")
 timestamp()
@@ -29,7 +52,7 @@ nks2$CI.99.a2.perf <- qt((1-0.005), df=q.n.sample-1)*nks2$agent.2.payoff.2/sqrt(
 
 write.csv(nks, file = "results0022_bench.csv")
 
-library(ggplot2)
+
 
 f1 <- ggplot(nks) + 
   geom_line(aes(x = period, y = agent.1.payoff, color = "Landscape Innovator")) +
@@ -61,6 +84,14 @@ f3 <- ggplot(nks) +
 png("figures/K_over_N.png",units = "px", width = 2400, height = 1680, res = 300 )
 plot(f3)
 dev.off()
+
+ggplot(nks) + 
+  geom_line(aes(x = period, y = agent.1.N)) +
+  xlab("Period") + ylab("N") + 
+  scale_color_manual(values = c("black"))+
+  theme_bw()
+
+
 
 f4 <- ggplot() + 
   geom_line(data = nks, aes(x = period, y = agent.1.hamming/agent.1.N, color = "Intelligent innovation")) +
@@ -104,14 +135,13 @@ dev.off()
 ###############
 
 f.bench <- ggplot() + 
-  #geom_line(data = nks, aes(x = period, y = agent.1.payoff[,1], color = "Landscape Innovator")) +
-  geom_line(data = nks, aes(x = period, y = agent.2.payoff, color = "Landscape Follower", ymin = (agent.2.payoff[,1]-CI.99.a2.perf), 
-                           ymax = (agent.2.payoff[,1]+CI.99.a2.perf))) +
-  #geom_line(data = nks2, aes(x = period, y = agent.1.payoff,color = "Redraw Benchmark"))+
+  geom_line(data = nks, aes(x = period, y = agent.1.payoff, color = "Landscape Innovator")) +
+  geom_line(data = nks, aes(x = period, y = agent.2.payoff, color = "Landscape Follower")) +
+  geom_line(data = nks2, aes(x = period, y = agent.1.payoff,color = "Redraw Benchmark"))+
   xlab("Period") + ylab("Performance") + 
   scale_color_manual(name = "Firm" , values = c("Landscape Innovator" = "red", "Landscape Follower" = "blue", "Redraw Benchmark" = "black"))+
-  theme_bw()+
-  geom_errorbar(data = nks, color = "black", size =0.15, position=position_dodge(width=0))
+  theme_bw()
+
 png("figures/benchmark.png",units = "px", width = 2400, height = 1680, res = 300 )
 plot(f.bench)
 dev.off()
@@ -128,3 +158,6 @@ dev.off()
 
 hist(df2$agent.1.hamming[df2$period==50])
 hist(df$agent.1.hamming[df$period==5])
+
+
+
